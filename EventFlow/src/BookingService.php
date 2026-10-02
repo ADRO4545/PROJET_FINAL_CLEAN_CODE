@@ -1,24 +1,28 @@
-<?php 
-declare(strict_types=1);
-
+<?php
 final class BookingService
 {
+    private array $observers = [];
+
+    public function addObserver(BookingConfirmedObserverInterface $observer): void
+    {
+        $this->observers[] = $observer;
+    }
+
     public function confirm(Booking $booking, string $paymentMethod = 'stripe'): float
     {
-
         if (count($booking->items) === 0) {
             throw new RuntimeException('Empty booking');
         }
+        
         if (!filter_var($booking->customer->email, FILTER_VALIDATE_EMAIL)) {
             throw new RuntimeException('Invalid email');
         }
-        
+                 
         foreach ($booking->items as $item) {
             if ($item->quantity <= 0) {
                 throw new RuntimeException('Invalid quantity');
             }
         }
-
 
         $calculator = new PositivePrice(
             new ThreeDaysDiscount(
@@ -27,9 +31,7 @@ final class BookingService
                 )
             )
         );
-
         $total = $calculator->calculate($booking);
-
 
         if ($paymentMethod === 'stripe') {
             $stripe = new StripeClient();
@@ -41,12 +43,13 @@ final class BookingService
             throw new RuntimeException('Unknown payment method');
         }
 
-
         $booking->status = 'confirmed';
         echo "SQL INSERT booking={$booking->id} total={$total} status={$booking->status}" . PHP_EOL;
 
-        $emailService = new EmailService();
-        $emailService->sendConfirmation($booking->customer->email, $booking->id);
+
+        foreach ($this->observers as $observer) {
+            $observer->onBookingConfirmed($booking, $total);
+        }
 
         return $total;
     }

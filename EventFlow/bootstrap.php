@@ -1,7 +1,4 @@
 <?php
-
-declare(strict_types=1);
-
 require_once __DIR__ . '/src/Customer.php';
 require_once __DIR__ . '/src/Ticket.php';
 require_once __DIR__ . '/src/BookingItem.php';
@@ -12,4 +9,14 @@ require_once __DIR__ . '/src/EmailService.php';
 require_once __DIR__ . '/src/SmsClient.php';
 require_once __DIR__ . '/src/LoyaltyService.php';
 require_once __DIR__ . '/src/AnalyticsClient.php';
+require_once __DIR__ . '/src/PriceCalculatorInterface.php';
+require_once __DIR__ . '/src/BasePriceCalculator.php';
+require_once __DIR__ . '/src/VipDiscount.php';
+require_once __DIR__ . '/src/ThreeDaysDiscount.php';
+require_once __DIR__ . '/src/PositivePrice.php';
+require_once __DIR__ . '/src/BookingConfirmedObserverInterface.php';
+require_once __DIR__ . '/src/EmailObserver.php';
+require_once __DIR__ . '/src/SmsObserver.php';
+require_once __DIR__ . '/src/LoyaltyObserver.php';
+require_once __DIR__ . '/src/AnalyticsObserver.php';
 require_once __DIR__ . '/src/BookingService.php';
