@@ -8,5 +8,8 @@ final class BookingItem
         public Ticket $ticket,
         public int $quantity
     ) {
+        if ($quantity <= 0) {
+            throw new RuntimeException('Invalid quantity');
+        }
     }
 }

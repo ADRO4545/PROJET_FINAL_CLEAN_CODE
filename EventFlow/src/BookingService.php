@@ -10,19 +10,6 @@ final class BookingService
 
     public function confirm(Booking $booking, string $paymentMethod): float
     {
-        if (count($booking->items) === 0) {
-            throw new RuntimeException('Empty booking');
-        }
-        
-        if (!filter_var($booking->customer->email, FILTER_VALIDATE_EMAIL)) {
-            throw new RuntimeException('Invalid email');
-        }
-                 
-        foreach ($booking->items as $item) {
-            if ($item->quantity <= 0) {
-                throw new RuntimeException('Invalid quantity');
-            }
-        }
 
         $calculator = new PositivePrice(
             new ThreeDaysDiscount(
