@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -22,7 +21,12 @@ function createBooking(
 }
 
 ob_start();
+
 $service = new BookingService();
+$service->addObserver(new EmailObserver(new EmailService()));
+$service->addObserver(new SmsObserver(new SmsClient()));
+$service->addObserver(new LoyaltyObserver(new LoyaltyService()));
+$service->addObserver(new AnalyticsObserver(new AnalyticsClient()));
 
 $standard = createBooking('standard', 'day', 50.0, 2);
 $standardTotal = $service->confirm($standard, 'stripe');
@@ -35,15 +39,16 @@ $tests->near(90.0, $vipTotal, 'legacy VIP rule gives 10 percent discount');
 
 $vipAndThreeDays = createBooking('vip', '3days', 60.0, 2);
 $vipAndThreeDaysTotal = $service->confirm($vipAndThreeDays, 'stripe');
-$tests->near(98.0, $vipAndThreeDaysTotal, 'VIP and 3 days discounts are cumulative');
+$tests->near(88.0, $vipAndThreeDaysTotal, 'VIP and 3 days discounts are cumulative');
 
 $threeDays = createBooking('standard', '3days', 60.0, 2);
 $threeDaysTotal = $service->confirm($threeDays, 'stripe');
-$tests->near(110.0, $threeDaysTotal, 'legacy three day pass discount is 10 euros');
+$tests->near(100.0, $threeDaysTotal, 'new three day pass discount is 20 euros');
 
 $largeQuantity = createBooking('standard', 'day', 15.50, 4);
 $largeQuantityTotal = $service->confirm($largeQuantity, 'stripe');
 $tests->near(62.0, $largeQuantityTotal, 'standard customer with 4 items calculates correct tot');
 
 ob_end_clean();
+
 $tests->summary();

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-final class StripeStrategy implements PayementStrategy
+final class StripeStrategy implements PayementStrategyInterface
 {
     private StripeClient $stripeClient;
 

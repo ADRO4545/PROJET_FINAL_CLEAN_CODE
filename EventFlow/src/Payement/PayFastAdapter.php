@@ -1,7 +1,7 @@
 <?php
-declare(strict_types=1);
 
-final class PayFastAdapter implements PayementStrategy
+
+final class PayFastAdapter implements PayementStrategyInterface
 {
     private PayFastSdk $payFastSdk;
 
@@ -17,13 +17,10 @@ final class PayFastAdapter implements PayementStrategy
             'amount_cents' => (int) ($amount * 100),
             'currency' => 'EUR'
         ];
-
         $result = $this->payFastSdk->executePayment($payload);
-
         if (!$result['success']) {
             throw new RuntimeException('Le paiement via PayFast a échoué.');
         }
-
         return $result['transaction_id'];
     }
 }

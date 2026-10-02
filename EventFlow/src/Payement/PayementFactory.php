@@ -1,19 +1,17 @@
 <?php
-declare(strict_types=1);
 
 final class PaymentFactory
 {
-    public static function create(string $type): PayementStrategy
+    public static function create(string $type): PayementStrategyInterface
     {
-        switch ($type) {
-            case 'stripe':
-                return new StripeStrategy(new StripeClient());
-            case 'payfast':
-                return new PayFastAdapter(new PayFastSdk());
-            default:
-                throw new InvalidArgumentException(
-                    sprintf('Le moyen de paiement "%s" n\'est pas supporté.', $type)
-                );
-        }
+        $strategy = match ($type) {
+            'stripe' => new StripeStrategy(new StripeClient()),
+            'payfast' => new PayFastAdapter(new PayFastSdk()),
+            default => throw new InvalidArgumentException(
+                sprintf('Le moyen de paiement "%s" n\'est pas supporté.', $type)
+            ),
+        };
+
+        return new LoggedPayementStrategy($strategy);
     }
 }

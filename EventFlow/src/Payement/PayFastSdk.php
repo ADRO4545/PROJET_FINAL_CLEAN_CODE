@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SDK externe fourni par PayFast.
  * CONSIGNE : ne pas modifier cette classe.

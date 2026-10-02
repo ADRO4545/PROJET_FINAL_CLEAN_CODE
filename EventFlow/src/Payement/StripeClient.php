@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 final class StripeClient
 {
     public function charge(float $amount): string

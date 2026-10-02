@@ -1,6 +1,6 @@
 <?php
 
-interface PayementStrategy
+interface PayementStrategyInterface
 {
     public function paid(float $amount): string;
 }
