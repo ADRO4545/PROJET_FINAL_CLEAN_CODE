@@ -10,5 +10,8 @@ final class Customer
         public ?string $phone = null,
         public string $type = 'standard'
     ) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Invalid email');
+        }
     }
 }

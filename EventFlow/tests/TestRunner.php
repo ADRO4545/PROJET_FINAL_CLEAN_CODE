@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 final class TestRunner
@@ -9,21 +8,31 @@ final class TestRunner
 
     public function same(mixed $expected, mixed $actual, string $label): void
     {
-        if ($expected === $actual) {
-            $this->passed++;
-            echo "OK   {$label}" . PHP_EOL;
-            return;
-        }
-
-        $this->failed++;
-        echo "FAIL {$label}" . PHP_EOL;
-        echo '     expected: ' . var_export($expected, true) . PHP_EOL;
-        echo '     actual:   ' . var_export($actual, true) . PHP_EOL;
+        $isSuccess = ($expected === $actual);
+        
+        $this->recordResult(
+            $isSuccess,
+            $label,
+            var_export($expected, true),
+            var_export($actual, true)
+        );
     }
 
     public function near(float $expected, float $actual, string $label, float $delta = 0.001): void
     {
-        if (abs($expected - $actual) <= $delta) {
+        $isSuccess = (abs($expected - $actual) <= $delta);
+        
+        $this->recordResult(
+            $isSuccess,
+            $label,
+            (string) $expected,
+            (string) $actual
+        );
+    }
+
+    private function recordResult(bool $isSuccess, string $label, string $expectedMsg, string $actualMsg): void
+    {
+        if ($isSuccess) {
             $this->passed++;
             echo "OK   {$label}" . PHP_EOL;
             return;
@@ -31,8 +40,8 @@ final class TestRunner
 
         $this->failed++;
         echo "FAIL {$label}" . PHP_EOL;
-        echo "     expected: {$expected}" . PHP_EOL;
-        echo "     actual:   {$actual}" . PHP_EOL;
+        echo "     expected: {$expectedMsg}" . PHP_EOL;
+        echo "     actual:   {$actualMsg}" . PHP_EOL;
     }
 
     public function summary(): void
