@@ -1,38 +1,37 @@
 <?php
-
-declare(strict_types=1);
-
 final class BookingService
 {
+    private array $observers = [];
+
+    public function addObserver(BookingConfirmedObserverInterface $observer): void
+    {
+        $this->observers[] = $observer;
+    }
+
     public function confirm(Booking $booking, string $paymentMethod): float
     {
         if (count($booking->items) === 0) {
             throw new RuntimeException('Empty booking');
         }
-
+        
         if (!filter_var($booking->customer->email, FILTER_VALIDATE_EMAIL)) {
             throw new RuntimeException('Invalid email');
         }
-
-        $total = 0.0;
-
+                 
         foreach ($booking->items as $item) {
             if ($item->quantity <= 0) {
                 throw new RuntimeException('Invalid quantity');
             }
-
-            $total += $item->ticket->price * $item->quantity;
         }
 
-        // Ancienne règle VIP : remise fixe de 10 %.
-        if ($booking->customer->type === 'vip') {
-            $total *= 0.90;
-        }
-
-        // Ancienne règle Pass 3 jours : remise fixe de 10 euros.
-        if ($booking->passType === '3days') {
-            $total -= 10.0;
-        }
+        $calculator = new PositivePrice(
+            new ThreeDaysDiscount(
+                new VipDiscount(
+                    new BasePriceCalculator()
+                )
+            )
+        );
+        $total = $calculator->calculate($booking);
 
         $paymentStrategy = PaymentFactory::create($paymentMethod);
         $transactionId = $paymentStrategy->paid($total);
@@ -40,11 +39,12 @@ final class BookingService
 
 
         $booking->status = 'confirmed';
-
         echo "SQL INSERT booking={$booking->id} total={$total} status={$booking->status}" . PHP_EOL;
 
-        $emailService = new EmailService();
-        $emailService->sendConfirmation($booking->customer->email, $booking->id);
+
+        foreach ($this->observers as $observer) {
+            $observer->onBookingConfirmed($booking, $total);
+        }
 
         return $total;
     }
