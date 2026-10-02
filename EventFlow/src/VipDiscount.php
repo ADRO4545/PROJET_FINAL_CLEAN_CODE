@@ -14,13 +14,10 @@ class VipDiscount implements PriceCalculatorInterface {
         if ($total < 100) {
             return $total * 0.95;
         }
-        if ($total < 300 && $total >= 100) {
-            return $total * 0.90;
-        }
         if ($total >= 300) {
             return $total * 0.85;
         }
 
-        return $total;
+        return $total * 0.90;
     }
 }
